@@ -26,23 +26,47 @@
         <div class="name">Platform:</div>
         <div class="value">{{ platform }}</div>
       </div>
+      <div class="item">
+        <div class="name">CPU Count:</div>
+        <div class="value">{{ osInfo.cpuCount }}</div>
+      </div>
+      <div class="item">
+        <div class="name">Memory:</div>
+        <div class="value">{{ osInfo.freemem }}</div>
+      </div>
+      <div class="item">
+        <div class="name">Uptime:</div>
+        <div class="value">{{ osInfo.sysUptime }}</div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-  export default {
-    data() {
-      return {
-        electron: process.versions['atom-shell'],
-        name: this.$route.name,
-        node: process.versions.node,
-        path: this.$route.path,
-        platform: require('os').platform(),
-        vue: require('vue/package.json').version,
-      };
-    },
-  };
+export default {
+  data() {
+    return {
+      electron: process.versions['atom-shell'],
+      name: this.$route.name,
+      node: process.versions.node,
+      path: this.$route.path,
+      platform: require('os').platform(),
+      vue: require('vue/package.json').version,
+      osInfo: {
+        cpuCount: '',
+        freemem: '',
+        sysUptime: '',
+      },
+    }
+  },
+  created() {
+    const os = require('os-utils')
+    const vm = this
+    vm.osInfo.cpuCount = os.cpuCount()
+    vm.osInfo.freemem = `${os.freemem()}/${os.totalmem()}`
+    vm.osInfo.sysUptime = os.sysUptime()
+  },
+}
 </script>
 
 <style scoped>
