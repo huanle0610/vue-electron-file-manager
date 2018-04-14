@@ -1,5 +1,6 @@
 import { app, BrowserWindow } from 'electron' // eslint-disable-line
-
+import ESI from 'electron-single-instance' // eslint-disable-line
+ESI.ensureSingleInstance('application name')
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -51,9 +52,11 @@ app.on('activate', () => {
  * support auto updating. Code Signing with a valid certificate is required.
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-electron-builder.html#auto-updating
  */
-
 /*
-import { autoUpdater } from 'electron-updater'
+import { autoUpdater } from 'electron-updater' // eslint-disable-line
+
+autoUpdater.logger = require('electron-log') // eslint-disable-line
+autoUpdater.logger.transports.file.level = 'info'
 
 autoUpdater.on('update-downloaded', () => {
   autoUpdater.quitAndInstall()
@@ -62,4 +65,4 @@ autoUpdater.on('update-downloaded', () => {
 app.on('ready', () => {
   if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
 })
- */
+*/
