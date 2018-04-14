@@ -1,6 +1,6 @@
 {
   "name": "file-manager",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "aladin <huanle0610@gmail.com>",
   "description": "electron-vue file manager",
   "license": "Apache-2.0",
@@ -55,8 +55,7 @@
         {
           "target": "nsis",
           "arch": [
-            "x64",
-            "ia32"
+            "x64"
           ]
         }
       ],
