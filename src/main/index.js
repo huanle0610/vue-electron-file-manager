@@ -1,6 +1,5 @@
-import { app, BrowserWindow } from 'electron' // eslint-disable-line
-import ESI from 'electron-single-instance' // eslint-disable-line
-ESI.ensureSingleInstance('application name')
+import { app, BrowserWindow, dialog } from 'electron' // eslint-disable-line
+import EnsureSingleton from './singleton'
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -9,7 +8,8 @@ if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\') // eslint-disable-line
 }
 
-let mainWindow
+const autoUpdate = false
+let mainWindow = null
 const winURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`
@@ -22,9 +22,21 @@ function createWindow() {
     height: 563,
     useContentSize: true,
     width: 1000,
+    frame: false, // (process.env.NODE_ENV !== 'production'),
+    show: false,
   })
 
-  mainWindow.loadURL(winURL)
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show()
+  })
+
+  EnsureSingleton(app, mainWindow)
+  const firstURL = (autoUpdate && process.env.NODE_ENV === 'production') ? `${winURL}#check-update` : winURL
+  mainWindow.loadURL(firstURL)
+
+  mainWindow.on('close', (event) => {
+    event.preventDefault()
+  })
 
   mainWindow.on('closed', () => {
     mainWindow = null
@@ -52,17 +64,30 @@ app.on('activate', () => {
  * support auto updating. Code Signing with a valid certificate is required.
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-electron-builder.html#auto-updating
  */
-/*
+import log from 'electron-log' // eslint-disable-line
 import { autoUpdater } from 'electron-updater' // eslint-disable-line
+if (autoUpdate) {
+  autoUpdater.logger = require('electron-log') // eslint-disable-line
+  autoUpdater.logger.transports.file.level = 'info'
 
-autoUpdater.logger = require('electron-log') // eslint-disable-line
-autoUpdater.logger.transports.file.level = 'info'
+  autoUpdater.on('update-available', (info) => {
+    log.info(`发现新版本 v${info.version}，即将自动更新...`)
+  })
 
-autoUpdater.on('update-downloaded', () => {
-  autoUpdater.quitAndInstall()
-})
+  autoUpdater.on('update-not-available', () => {
+    mainWindow.loadURL(`${winURL}`)
+  })
 
-app.on('ready', () => {
-  if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
-})
-*/
+  autoUpdater.on('download-progress', (progress) => {
+    mainWindow.setProgressBar(progress.percent)
+  })
+
+  autoUpdater.on('update-downloaded', () => {
+    mainWindow.setProgressBar(-1)
+    autoUpdater.quitAndInstall()
+  })
+
+  app.on('ready', () => {
+    if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
+  })
+}

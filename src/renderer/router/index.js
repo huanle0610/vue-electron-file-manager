@@ -11,6 +11,11 @@ export default new Router({
       component: require('@/components/LandingPage').default,
     },
     {
+      path: '/check-update',
+      name: 'check-update',
+      component: require('@/components/CheckUpdate').default,
+    },
+    {
       path: '*',
       redirect: '/',
     },

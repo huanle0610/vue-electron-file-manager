@@ -9,6 +9,7 @@
         <span class="title">
           Welcome to your new project!
         </span>
+        <div v-html="table"/>
         <system-information/>
       </div>
 
@@ -30,6 +31,9 @@
           <button
             class="alt"
             @click="open('https://vuejs.org/v2/guide/')">Vue.js</button>
+          <button
+            class="alt"
+            @click="openPM">openProcessManager</button>
         </div>
       </div>
     </main>
@@ -37,14 +41,31 @@
 </template>
 
 <script>
+import path from 'path'
 import SystemInformation from './LandingPage/SystemInformation'
 
 export default {
   name: 'LandingPage',
   components: { SystemInformation },
+  data() {
+    return {
+      table: '',
+      path: path.join(__static, '/User.ps1'),
+    }
+  },
   methods: {
     open(link) {
       this.$electron.shell.openExternal(link)
+    },
+    openPM() {
+      const vm = this
+      const ps = require('../../win/process').default
+      // console.log(ps)
+      ps().then((output) => {
+        const tableify = require('html-tableify')
+        // console.log(output, 92)
+        vm.table = tableify(JSON.parse(output))
+      })
     },
   },
 }
